@@ -25,11 +25,14 @@ type callFrame interface {
 	storeConstant(constName string, constant interface{}) *Pointer
 	lookupConstant(constName string) *Pointer
 	inspect() string
+	Self() Object
+	BlockFrame() *normalCallFrame
 }
 
 type goMethodCallFrame struct {
 	*baseFrame
-	method *BuiltinMethodObject
+	method builtinMethodBody
+	name string
 }
 
 type normalCallFrame struct {
@@ -37,6 +40,14 @@ type normalCallFrame struct {
 	instructionSet *instructionSet
 	// program counter
 	pc int
+}
+
+func (b *baseFrame) Self() Object {
+	return b.self
+}
+
+func (b *baseFrame) BlockFrame() *normalCallFrame {
+	return b.blockFrame
 }
 
 // We use lock on every local variable retrieval and insertion.
@@ -167,9 +178,9 @@ func (cfs *callFrameStack) top() callFrame {
 }
 
 func newNormalCallFrame(is *instructionSet) *normalCallFrame {
-	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 100), lPr: 0}, instructionSet: is, pc: 0}
+	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0}, instructionSet: is, pc: 0}
 }
 
-func newGoMethodCallFrame(m *BuiltinMethodObject) *goMethodCallFrame {
-	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 100), lPr: 0}, method: m}
+func newGoMethodCallFrame(m builtinMethodBody, n string) *goMethodCallFrame {
+	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0}, method: m, name: n}
 }

@@ -328,7 +328,7 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	return c
 }
 
-func (vm *VM) lookupConstant(cf *normalCallFrame, constName string) (constant *Pointer) {
+func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer) {
 	var namespace *RClass
 	var hasNamespace bool
 
